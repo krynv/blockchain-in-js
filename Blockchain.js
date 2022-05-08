@@ -3,6 +3,8 @@ const Block = require('./Block');
 class Blockchain {
     constructor() {
         this.chain = [this.createGenesisBlock()];
+        this.difficulty = 1;
+        this.blockTime = 30000;
     }
 
     createGenesisBlock() {
@@ -13,7 +15,11 @@ class Blockchain {
         block.previousHash = this.getLastBlock().hash;
         block.hash = block.getHash();
 
+        block.mine(this.difficulty);
+
         this.chain.push(block);
+
+        this.difficulty += Date.now() - parseInt(this.getLastBlock().timestamp) < this.blockTime ? 1 : -1;
     }
 
     getLastBlock() {
