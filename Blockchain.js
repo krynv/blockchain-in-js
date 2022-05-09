@@ -1,6 +1,12 @@
 const Block = require('./Block');
 const Transaction = require('./Transaction');
 
+const {
+    MINT_KEY_PAIR,
+    MINT_PUBLIC_ADDRESS,
+    holderKeyPair
+} = require('./helpers');
+
 class Blockchain {
     constructor() {
         this.chain = [this.createGenesisBlock()];
@@ -11,7 +17,8 @@ class Blockchain {
     }
 
     createGenesisBlock() {
-        return new Block(Date.now().toString(), ['Genesis block']);
+        const initialCoinRelease = new Transaction(MINT_PUBLIC_ADDRESS, holderKeyPair.getPublic('hex'), 100000);
+        return new Block(Date.now().toString(), [initialCoinRelease]);
     }
 
     addBlock(block) {
@@ -34,7 +41,11 @@ class Blockchain {
             const currentBlock = blockchain.chain[i];
             const previousBlock = blockchain.chain[i - 1];
 
-            if (currentBlock.hash !== currentBlock.getHash() || currentBlock.previousHash !== previousBlock.hash) {
+            if (
+                currentBlock.hash !== currentBlock.getHash() ||
+                currentBlock.previousHash !== previousBlock.hash ||
+                !currentBlock.hasValidTransactions(blockchain)
+            ) {
                 return false;
             }
 
@@ -43,12 +54,45 @@ class Blockchain {
     }
 
     addTransaction(transaction) {
-        this.transactionPoolpush(transaction);
+        if (transaction.isValid(transaction, this)) {
+            this.transactionPool.push(transaction);
+        }
     }
 
-    miningTransactions() {
-        this.addBlock(new Block(Date.now().toString(), [new Transaction(CREATE_REWARD_ADDRESS, rewardAddress, this.reward), ...this.transactionPool]));
+    mineTransactions(rewardAddress) {
+        let totalGassFee = 0;
+
+        this.transactionPool.forEach(transaction => {
+            totalGassFee += transaction.gas;
+        });
+
+        const rewardTransaction = new Transaction(MINT_PUBLIC_ADDRESS, rewardAddress, this.reward + totalGassFee);
+        rewardTransaction.sign(MINT_KEY_PAIR);
+
+        if (this.transactionPool.length !== 0) {
+            this.addBlock(new Block(Date.now().toString(), [rewardTransaction, ...this.transactionPool]));
+        }
+
         this.transactionPool = [];
+    }
+
+    getBalance(address) {
+        let balance = 0;
+
+        this.chain.forEach(block => {
+            block.data.forEach(transaction => {
+                if (transaction.from === address) {
+                    balance -= transaction.amount;
+                    balance -= transaction.gas;
+                }
+
+                if (transaction.to === address) {
+                    balance += transaction.amount;
+                }
+            });
+        });
+
+        return balance;
     }
 }
 

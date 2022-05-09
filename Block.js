@@ -1,4 +1,4 @@
-const { createSHA256Hash } = require('./helpers');
+const { createSHA256Hash, MINT_PUBLIC_ADDRESS } = require('./helpers');
 
 class Block {
     constructor(timestamp = '', data = []) {
@@ -10,7 +10,7 @@ class Block {
     }
 
     getHash() {
-        return createSHA256Hash(JSON.stringify(this.data) + this.timestamp + this.previousHash + this.nonce);
+        return createSHA256Hash(this.previousHash + this.timestamp + JSON.stringify(this.data) + this.timestamp + this.nonce);
     }
 
     mine(difficulty) {
@@ -18,6 +18,25 @@ class Block {
             this.nonce++;
             this.hash = this.getHash();
         }
+    }
+
+    hasValidTransactions(chain) {
+        let gas = 0;
+        let reward = 0;
+
+        this.data.forEach(transaction => {
+            if (transaction.from !== MINT_PUBLIC_ADDRESS) {
+                gas += transaction.gas;
+            } else {
+                reward += transaction.amount;
+            }
+        });
+
+        return (
+            reward - gas === chain.reward &&
+            this.data.every(transaction => transaction.isValid(transaction, chain)) &&
+            this.data.filter(transaction => transaction.from === MINT_PUBLIC_ADDRESS).length === 1
+        );
     }
 }
 
