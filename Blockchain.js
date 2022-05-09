@@ -1,10 +1,13 @@
 const Block = require('./Block');
+const Transaction = require('./Transaction');
 
 class Blockchain {
     constructor() {
         this.chain = [this.createGenesisBlock()];
         this.difficulty = 1;
         this.blockTime = 30000;
+        this.transactionPool = [];
+        this.reward = 100;
     }
 
     createGenesisBlock() {
@@ -37,6 +40,15 @@ class Blockchain {
 
             return true;
         }
+    }
+
+    addTransaction(transaction) {
+        this.transactionPoolpush(transaction);
+    }
+
+    miningTransactions() {
+        this.addBlock(new Block(Date.now().toString(), [new Transaction(CREATE_REWARD_ADDRESS, rewardAddress, this.reward), ...this.transactionPool]));
+        this.transactionPool = [];
     }
 }
 
