@@ -1,11 +1,11 @@
 {
-    "name": "blockchain-in",
+    "name": "blockchain-in-js",
     "version": "1.0.0",
     "description": "",
     "main": "index.js",
     "scripts": {
         "start": "node index.js",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "mocha --timeout 20000 \"{,!(node_modules)/**/*}*.spec.js\""
     },
     "keywords": [],
     "author": "",
