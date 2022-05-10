@@ -6,7 +6,7 @@ const { MINT_PUBLIC_ADDRESS } = require('./helpers');
 
 describe('Block', () => {
     describe('constructor', () => {
-        it('should return a block using the given parameters', () => {
+        it('should create a block using the given parameters', () => {
             const givenDate = Date.now().toString();
             const givenData = ['Something'];
             const regex = /[0-9A-Fa-f]{6}/g;
@@ -31,7 +31,7 @@ describe('Block', () => {
             expect(block.nonce).to.equal(0);
         });
 
-        it('should return a block using the default parameters', () => {
+        it('should create a block using the default parameters', () => {
             const regex = /[0-9A-Fa-f]{6}/g;
             const block = new Block();
 
