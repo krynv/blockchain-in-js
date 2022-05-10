@@ -37,6 +37,12 @@ class Blockchain {
     }
 
     isValid(blockchain = this) {
+
+        if (blockchain.chain.length === 1) {
+            // it only contains the genesis block, therefore must be valid
+            return true;
+        }
+
         for (let i = 1; i < blockchain.chain.length; i++) {
             const currentBlock = blockchain.chain[i];
             const previousBlock = blockchain.chain[i - 1];
@@ -55,7 +61,7 @@ class Blockchain {
 
     addTransaction(transaction) {
         if (transaction.isValid(transaction, this)) {
-            this.transactionPool.push(transaction);
+            this.transactionPool.push(Object.freeze(transaction));
         }
     }
 
