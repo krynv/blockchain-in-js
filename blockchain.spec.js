@@ -1,4 +1,6 @@
 const { expect } = require('chai');
+const EC = require('elliptic').ec;
+const ec = new EC('secp256k1');
 const Blockchain = require('./Blockchain');
 const Block = require('./Block');
 const Transaction = require('./Transaction');
@@ -93,4 +95,71 @@ describe('Blockchain', () => {
             expect(lastBlock).to.deep.equal(newBlock);
         });
     });
+
+    describe('isValid', () => {
+        it('should return true if the chain is valid', () => {
+            const blockchain = new Blockchain();
+            expect(blockchain.isValid()).to.be.true;
+        });
+    });
+
+    describe('addTransaction', () => {
+        it('should add a transaction to the transaction pool', () => {
+            const holderPublicKey = holderKeyPair.getPublic('hex');
+            const otherPublicKey = ec.genKeyPair().getPublic('hex');
+
+            const blockchain = new Blockchain();
+            const transaction = new Transaction(holderPublicKey, otherPublicKey, 100, 5);
+
+            transaction.sign(holderKeyPair);
+            blockchain.addTransaction(transaction);
+
+            expect(blockchain.transactionPool.length).to.equal(1);
+            expect(blockchain.transactionPool[0]).to.be.instanceOf(Transaction);
+            expect(blockchain.transactionPool[0]).to.deep.equal(transaction);
+        });
+    });
+
+    describe('mineTransactions', () => {
+        it('should add a block to the chain', () => {
+            const holderPublicKey = holderKeyPair.getPublic('hex');
+            const otherPublicKey = ec.genKeyPair().getPublic('hex');
+
+            const blockchain = new Blockchain();
+            const transaction = new Transaction(holderPublicKey, otherPublicKey, 100, 5);
+
+            transaction.sign(holderKeyPair);
+            blockchain.addTransaction(transaction);
+            blockchain.mineTransactions(holderPublicKey);
+
+            expect(blockchain.chain.length).to.equal(2);
+            expect(blockchain.chain[1]).to.be.instanceOf(Block);
+            expect(blockchain.chain[1].data[1]).to.be.instanceOf(Transaction);
+            expect(blockchain.chain[1].data[1]).to.deep.equal(transaction);
+        });
+    });
+
+    describe('getBalance', () => {
+        it('should return the balance of a public key', () => {
+            const holderPublicKey = holderKeyPair.getPublic('hex');
+            const otherPublicKey = ec.genKeyPair().getPublic('hex');
+
+            const blockchain = new Blockchain();
+
+            const balanceBeforeTransaction = blockchain.getBalance(otherPublicKey);
+            expect(balanceBeforeTransaction).to.be.a('number');
+            expect(balanceBeforeTransaction).to.equal(0);
+
+            const transaction = new Transaction(holderPublicKey, otherPublicKey, 100, 5);
+            transaction.sign(holderKeyPair);
+            blockchain.addTransaction(transaction);
+            blockchain.mineTransactions(holderPublicKey);
+
+            const finalBalance = blockchain.getBalance(otherPublicKey);
+            expect(finalBalance).to.be.a('number');
+            expect(finalBalance).to.equal(100);
+        });
+    });
+
+
 });
