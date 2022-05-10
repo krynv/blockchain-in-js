@@ -19,7 +19,7 @@ describe('Block', () => {
             expect(block.timestamp).to.be.a('string');
             expect(block.timestamp).to.equal(givenDate);
 
-            expect(block.data).to.be.a('array');
+            expect(block.data).to.be.an('array');
             expect(block.data).to.deep.equal(givenData);
 
             expect(block.hash).to.be.a('string');
@@ -41,7 +41,7 @@ describe('Block', () => {
             expect(block.timestamp).to.be.a('string');
             expect(block.timestamp).to.equal('');
 
-            expect(block.data).to.be.a('array');
+            expect(block.data).to.be.an('array');
             expect(block.data).to.deep.equal([]);
 
             expect(block.hash).to.be.a('string');
@@ -85,6 +85,7 @@ describe('Block', () => {
                 gas: 1,
                 isValid: () => true
             }]);
+
             const mockChain = {
                 chain: [{
                     timestamp: "1652115354151",
@@ -98,7 +99,7 @@ describe('Block', () => {
                 transactionPool: [],
                 reward: 1,
                 getBalance: () => 100000,
-            }
+            };
 
             expect(block.hasValidTransactions(mockChain)).to.be.true;
         });
