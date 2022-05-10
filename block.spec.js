@@ -6,9 +6,51 @@ const { MINT_PUBLIC_ADDRESS } = require('./helpers');
 
 describe('Block', () => {
     describe('constructor', () => {
-        it('should return a block', () => {
-            const block = new Block(Date.now().toString(), []);
+        it('should return a block using the given parameters', () => {
+            const givenDate = Date.now().toString();
+            const givenData = ['Something'];
+            const regex = /[0-9A-Fa-f]{6}/g;
+
+            const block = new Block(givenDate, givenData);
+
             expect(block).to.be.an('object');
+            expect(block).to.be.instanceOf(Block);
+
+            expect(block.timestamp).to.be.a('string');
+            expect(block.timestamp).to.equal(givenDate);
+
+            expect(block.data).to.be.a('array');
+            expect(block.data).to.deep.equal(givenData);
+
+            expect(block.hash).to.be.a('string');
+            expect(regex.test(block.hash)).to.be.true;
+
+            expect(block.previousHash).to.be.null;
+
+            expect(block.nonce).to.be.a('number');
+            expect(block.nonce).to.equal(0);
+        });
+
+        it('should return a block using the default parameters', () => {
+            const regex = /[0-9A-Fa-f]{6}/g;
+            const block = new Block();
+
+            expect(block).to.be.an('object');
+            expect(block).to.be.instanceOf(Block);
+
+            expect(block.timestamp).to.be.a('string');
+            expect(block.timestamp).to.equal('');
+
+            expect(block.data).to.be.a('array');
+            expect(block.data).to.deep.equal([]);
+
+            expect(block.hash).to.be.a('string');
+            expect(regex.test(block.hash)).to.be.true;
+
+            expect(block.previousHash).to.be.null;
+
+            expect(block.nonce).to.be.a('number');
+            expect(block.nonce).to.equal(0);
         });
     });
 
@@ -28,7 +70,7 @@ describe('Block', () => {
             const block = new Block(Date.now().toString(), []);
             expect(block.nonce).to.equal(0);
             block.mine(1);
-            expect(block.nonce).to.be.greaterThan(0);
+            expect(block.nonce).to.be.greaterThanOrEqual(0);
             expect(block.hash).to.be.a('string');
             expect(regex.test(block.hash)).to.be.true;
         });
