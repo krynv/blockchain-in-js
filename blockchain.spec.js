@@ -8,7 +8,7 @@ const { MINT_PUBLIC_ADDRESS, holderKeyPair } = require('./helpers');
 
 describe('Blockchain', () => {
     describe('constructor', () => {
-        it('should return a blockchain', () => {
+        it('should create a new blockchain', () => {
             const blockchain = new Blockchain();
             expect(blockchain).to.be.an('object');
             expect(blockchain).to.be.instanceOf(Blockchain);
